@@ -1,0 +1,23 @@
+- id: 1
+  title: "Neews #1"
+  description: |
+    A pochi giorni dal lancio di Crimson Desert, la community dei giocatori ha inondato Reddit e i social media con una serie di scoperte imbarazzanti. 
+    Esplorando il mondo di Pywel, molti utenti si sono imbattuti in quadri, dipinti e cartelli palesemente generati dall'intelligenza artificiale. Tra cavalli anatomicamente impossibili, cavalieri fusi tra loro, spade dalle geometrie prive di senso e le immancabili mani con dita extra, le immagini sono diventate subito virali.
+  links:
+  - "https://www.instagram.com/p/DWIENCmDk79"
+
+- id: 2
+  title: "Neews #2"
+  description: |
+    Il mondo del fumetto piange la scomparsa di Sam Kieth, disegnatore e sceneggiatore venuto a mancare il 15 marzo 2026 all'età di 63 anni. 
+    La notizia è stata confermata dalla famiglia e da colleghi intimi, rivelando che l'artista lottava da tempo contro le complicazioni della demenza a corpi di Lewy
+  links:
+  - "https://www.instagram.com/p/DWNG0UEGGYw"
+
+- id: 3
+  title: "Neews #3"
+  description: |
+    Il prolungarsi del conflitto in Medio Oriente rischia di innescare un disastroso "cigno nero" per l'industria globale dei semiconduttori. 
+    Secondo gli analisti di Barclays, le interruzioni nelle spedizioni di gas e petrolio minacciano gravemente la stabilità energetica di nazioni chiave come Taiwan, mettendo a rischio la produzione dei chip avanzati e minacciando di frenare bruscamente l'intera corsa all'intelligenza artificiale.
+  links:
+  - "https://multiplayer.it/notizie/il-conflitto-in-medio-oriente-minaccia-di-paralizzare-la-produzione-globale-di-chip-destinati-allia.html"
