@@ -1,0 +1,23 @@
+- id: 1
+  title: "Coyote vs. Acme - Il primo trailer ufficiale arriverà la prossima settimana"
+  description: |
+    Dopo una lunga e travagliata attesa, i fan dell'animazione possono finalmente esultare: il film Coyote vs. Acme è pronto a mostrarsi al pubblico. L'annuncio dell'imminente arrivo del 
+    trailer è stato svelato a sorpresa tramite un post sui social media pubblicato proprio in occasione del "Tax Day" americano.
+  links:
+  - "https://www.instagram.com/p/DXLcOVWDTh7/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+
+- id: 2
+  title: "Street Fighter - Il trailer del nuovo film live-action svelato al CinemaCon"
+  description: |
+    Il primo trailer del nuovo adattamento cinematografico in live-action di Street Fighter è stato finalmente svelato da Paramount Pictures e Legendary Entertainment in occasione del CinemaCon 2026. Diretto da Kitao Sakurai, il film riporta sul grande 
+    schermo l'iconico picchiaduro di casa Capcom abbracciando un tono volutamente esagerato, colorato e ricco di azione.
+  links:
+  - "https://youtu.be/ezg6aYeEnzg?si=DDsYWSDP2OGzHLNq"
+
+- id: 3
+  title: "Classifiche di vendita in Giappone - Pokémon Pokopia a un passo dal milione di copie"
+  description: |
+    Il nuovo cozy game dell'universo Pokémon continua a dominare le classifiche di vendita nipponiche. Pokémon Pokopia, disponibile in esclusiva su Nintendo Switch 2, 
+    mantiene saldamente la prima posizione e si prepara a tagliare un traguardo di vendite impressionante nel solo territorio giapponese.
+  links:
+  - "https://multiplayer.it/notizie/classifica-giapponese-pokemon-pokopia-e-vicino-al-milione-di-copie.html"
