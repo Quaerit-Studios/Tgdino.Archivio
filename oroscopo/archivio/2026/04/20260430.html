@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Tavolo della Cartomante - L'Oroscopo di Dino</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'cinzel': ['"Cinzel Decorative"', 'serif'],
+                        'fell': ['"IM Fell English"', 'serif'],
+                        'medieval': ['"MedievalSharp"', 'cursive'],
+                    },
+                    colors: {
+                        wood: {
+                            900: '#1a0d05',
+                            800: '#2d180b',
+                            700: '#3e2312'
+                        },
+                        velvet: {
+                            base: '#4a0e17',
+                            dark: '#26040a',
+                            glow: '#7a1424'
+                        },
+                        gold: {
+                            light: '#fcecae',
+                            base: '#d4af37',
+                            dark: '#8a6a1c',
+                            antique: '#b5974a'
+                        },
+                        parchment: {
+                            light: '#fdf3d8',
+                            base: '#eaddcf',
+                            dark: '#c4b095',
+                            burn: '#4a3219'
+                        }
+                    },
+                    boxShadow: {
+                        'card': '8px 8px 20px rgba(0,0,0,0.9), -1px -1px 2px rgba(255,255,255,0.05) inset',
+                        'card-hover': '15px 20px 30px rgba(0,0,0,0.95), -1px -1px 3px rgba(255,255,255,0.2) inset',
+                        'parchment': '0 30px 60px rgba(0,0,0,0.95), inset 0 0 50px rgba(74, 50, 25, 0.5)',
+                        'glow': '0 0 40px rgba(212, 175, 55, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* ================= IMPOSTAZIONI ================= */
+        body {
+            background-color: #050201;
+            color: #eaddcf;
+            overflow-x: hidden;
+            overflow-y: scroll; 
+            scrollbar-width: thin;
+            scrollbar-color: #8a6a1c #050201;
+        }
+
+        /* ================= SFONDO ================= */
+        .bg-layer {
+            position: fixed; inset: 0; z-index: -1;
+            transition: opacity 1.5s ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Sfondo Intro */
+        #bg-intro {
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(38, 4, 10, 0.8) 0%, rgba(5, 2, 1, 1) 80%),
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%231a0505' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 1;
+        }
+
+        /* Sfondo */
+        #bg-table {
+            background-color: #1a0d05;
+            background-image: 
+                radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.95) 100%),
+                linear-gradient(to right, transparent 10%, rgba(38,4,10,0.9) 25%, #4a0e17 50%, rgba(38,4,10,0.9) 75%, transparent 90%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+                linear-gradient(to bottom, #2d180b, #1a0d05);
+            opacity: 0;
+        }
+
+        /* Incenso */
+        .smoke-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 1; mix-blend-mode: screen; opacity: 0.15;
+            background-image: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog1.png');
+            animation: smoke 60s linear infinite;
+        }
+        @keyframes smoke { 0% { background-position: 0 0; } 100% { background-position: 100vw 0; } }
+
+        /* Luce */
+        .candlelight-flicker {
+            position: fixed; inset: 0; pointer-events: none; z-index: 25;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.08) 0%, rgba(15, 5, 0, 0.5) 100%);
+            mix-blend-mode: overlay;
+            animation: flicker-light 5s infinite alternate ease-in-out;
+        }
+        @keyframes flicker-light {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            25% { opacity: 0.95; transform: scale(1.02); }
+            50% { opacity: 0.6; }
+            75% { opacity: 1; transform: scale(0.99); }
+        }
+
+        /* Cielo Stellato */
+        .celestial-sky {
+            position: fixed; top: -50%; left: -50%; width: 200vw; height: 200vh;
+            pointer-events: none; z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='rgba(212,175,55,0.4)' stroke-width='1.5' fill='none'%3E%3Cpolyline points='150,150 220,110 320,180 400,120'/%3E%3Cpolyline points='750,200 820,280 900,240 950,350'/%3E%3Cpolyline points='100,750 180,820 250,780 320,880 400,850'/%3E%3Cpolyline points='600,800 680,720 780,780 850,700 920,750'/%3E%3Cpolyline points='400,450 480,380 550,480 650,420'/%3E%3Cpolygon points='300,500 350,580 250,620'/%3E%3Cpolyline points='800,500 850,550 780,620'/%3E%3C/g%3E%3Cg fill='%23fcecae'%3E%3Ccircle cx='150' cy='150' r='3'/%3E%3Ccircle cx='220' cy='110' r='2'/%3E%3Ccircle cx='320' cy='180' r='2.5'/%3E%3Ccircle cx='400' cy='120' r='3'/%3E%3Ccircle cx='750' cy='200' r='2.5'/%3E%3Ccircle cx='820' cy='280' r='3'/%3E%3Ccircle cx='900' cy='240' r='2'/%3E%3Ccircle cx='950' cy='350' r='3'/%3E%3Ccircle cx='100' cy='750' r='2'/%3E%3Ccircle cx='180' cy='820' r='3'/%3E%3Ccircle cx='250' cy='780' r='2.5'/%3E%3Ccircle cx='320' cy='880' r='2'/%3E%3Ccircle cx='400' cy='850' r='3'/%3E%3Ccircle cx='600' cy='800' r='3'/%3E%3Ccircle cx='680' cy='720' r='2'/%3E%3Ccircle cx='780' cy='780' r='2.5'/%3E%3Ccircle cx='850' cy='700' r='3'/%3E%3Ccircle cx='920' cy='750' r='2'/%3E%3Ccircle cx='400' cy='450' r='2.5'/%3E%3Ccircle cx='480' cy='380' r='2'/%3E%3Ccircle cx='550' cy='480' r='3'/%3E%3Ccircle cx='650' cy='420' r='2'/%3E%3Ccircle cx='300' cy='500' r='2'/%3E%3Ccircle cx='350' cy='580' r='3'/%3E%3Ccircle cx='250' cy='620' r='2.5'/%3E%3Ccircle cx='800' cy='500' r='2'/%3E%3Ccircle cx='850' cy='550' r='2.5'/%3E%3Ccircle cx='780' cy='620' r='3'/%3E%3C/g%3E%3Cg fill='%23ffffff' opacity='0.8'%3E%3Ccircle cx='50' cy='80' r='1.5'/%3E%3Ccircle cx='380' cy='50' r='1'/%3E%3Ccircle cx='600' cy='90' r='2'/%3E%3Ccircle cx='850' cy='60' r='1.5'/%3E%3Ccircle cx='950' cy='150' r='1'/%3E%3Ccircle cx='500' cy='200' r='1.5'/%3E%3Ccircle cx='80' cy='300' r='1'/%3E%3Ccircle cx='250' cy='350' r='2'/%3E%3Ccircle cx='650' cy='320' r='1'/%3E%3Ccircle cx='880' cy='400' r='1.5'/%3E%3Ccircle cx='120' cy='450' r='1'/%3E%3Ccircle cx='500' cy='550' r='2'/%3E%3Ccircle cx='950' cy='600' r='1'/%3E%3Ccircle cx='50' cy='680' r='1.5'/%3E%3Ccircle cx='450' cy='720' r='1'/%3E%3Ccircle cx='700' cy='680' r='1.5'/%3E%3Ccircle cx='300' cy='800' r='1'/%3E%3Ccircle cx='550' cy='880' r='2'/%3E%3Ccircle cx='850' cy='900' r='1.5'/%3E%3Ccircle cx='150' cy='950' r='1'/%3E%3Ccircle cx='750' cy='960' r='1'/%3E%3Ccircle cx='980' cy='800' r='1.5'/%3E%3Ccircle cx='40' cy='500' r='1'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 600px 600px;
+            opacity: 0.6;
+            mix-blend-mode: screen;
+            animation: rotate-sky 180s linear infinite;
+        }
+        .celestial-sky::after {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: inherit;
+            background-size: 900px 900px;
+            opacity: 0.4;
+            animation: rotate-sky-reverse 240s linear infinite;
+        }
+        @keyframes rotate-sky {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes rotate-sky-reverse {
+            0% { transform: rotate(45deg); }
+            100% { transform: rotate(-315deg); }
+        }
+
+        /* ================= LA PERGAMENA ================= */
+        .parchment-paper {
+            background-color: #e8dcc4;
+            background-image: 
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E"),
+                radial-gradient(ellipse at center, rgba(232,220,196,1) 0%, rgba(214,196,158,1) 50%, rgba(160,120,80,0.8) 100%);
+            color: #2b1810;
+            position: relative;
+            border-radius: 3px;
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.9), 
+                inset 0 0 60px rgba(139, 69, 19, 0.4), 
+                inset 0 0 25px rgba(74, 50, 25, 0.7),
+                0 0 0 1px rgba(101, 67, 33, 0.4);
+            overflow: hidden;
+        }
+        .parchment-paper::before {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            box-shadow: inset 0 0 120px rgba(0,0,0,0.5);
+            mix-blend-mode: multiply;
+        }
+        /* Cornici e Linee interne alla pergamena */
+        .parchment-lines {
+            position: absolute; inset: 16px; pointer-events: none;
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            background-image: 
+                linear-gradient(to right, rgba(139, 69, 19, 0.1) 0%, transparent 5%, transparent 95%, rgba(139, 69, 19, 0.1) 100%),
+                linear-gradient(to bottom, rgba(139, 69, 19, 0.15) 0%, transparent 5%, transparent 95%, rgba(139, 69, 19, 0.15) 100%);
+        }
+        .parchment-lines::before, .parchment-lines::after {
+            content: ''; position: absolute; width: 12px; height: 12px;
+            border: 2px solid rgba(139, 69, 19, 0.5);
+        }
+        .parchment-lines::before { top: -4px; left: -4px; border-right:none; border-bottom:none; }
+        .parchment-lines::after { bottom: -4px; right: -4px; border-left:none; border-top:none; }
+
+        /* Capolettera (Iniziale) Sottile, Dorata scura con Profondità */
+        .dropcap-text {
+            color: #7a5214; /* Un dorato antico molto scuro e leggibile */
+            text-shadow: 
+                1px 1px 0px rgba(255, 240, 200, 0.5), /* Luce in basso a destra (rilievo) */
+                -1px -1px 0px rgba(40, 20, 0, 0.8),   /* Ombra in alto a sinistra (incisione) */
+                3px 3px 6px rgba(0, 0, 0, 0.7);       /* Ombra sporgente marcata per dare profondità */
+        }
+
+        /* ================= TAVOLO: MANDALA E ORNAMENTI ================= */
+        .arcane-runes-bg {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 900px; height: 900px; pointer-events: none; opacity: 0.15;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23d4af37' fill='none' stroke-width='1.5' opacity='0.8'%3E%3Ccircle cx='250' cy='250' r='240'/%3E%3Ccircle cx='250' cy='250' r='230'/%3E%3Ccircle cx='250' cy='250' r='180'/%3E%3Ccircle cx='250' cy='250' r='170'/%3E%3Cpolygon points='250,20 450,380 50,380'/%3E%3Cpolygon points='250,480 50,120 450,120'/%3E%3Cpath d='M250 80 L280 220 L420 250 L280 280 L250 420 L220 280 L80 250 L220 220 Z'/%3E%3Ccircle cx='250' cy='250' r='80'/%3E%3Ccircle cx='250' cy='250' r='40'/%3E%3C/g%3E%3C/svg%3E");
+            animation: spin-arcane 150s linear infinite;
+            filter: drop-shadow(0 0 15px rgba(212,175,55,0.6));
+            z-index: 10;
+        }
+        @keyframes spin-arcane { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* ================= LE CARTE ================= */
+        .tarot-aspect { aspect-ratio: 1 / 1.618; } 
+        
+        .card-scatter-wrapper {
+            perspective: 1200px;
+            width: 140px; 
+            margin: 10px;
+            z-index: 15;
+            transition: z-index 0.3s;
+        }
+        @media (min-width: 768px) { .card-scatter-wrapper { width: 175px; margin: -10px 15px; } }
+        
+        .card-scatter-wrapper:hover { z-index: 35; }
+
+        .card-wrapper {
+            width: 100%; height: 100%;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 10px 10px 25px rgba(0,0,0,0.95);
+            border-radius: 5px;
+        }
+
+        .card-wrapper:hover .card-inner {
+            transform: translateY(-25px) rotateX(15deg) scale(1.08);
+            box-shadow: 20px 30px 40px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(212, 175, 55, 0.4);
+        }
+
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 5px;
+            border: 2px solid #000; 
+        }
+
+        /* DORSO DELLA CARTA */
+        .card-back {
+            background-color: #050201; 
+            background-image: url('https://i.pinimg.com/736x/04/72/2f/04722fdf342d50dd7ca03a8bc9a9c030.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 4px solid #8a6a1c; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            overflow: hidden;
+            outline: 2px solid #111; outline-offset: -1px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+        }
+        
+        .card-back-ornament {
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        
+        /* OVERLAY HOVER (Nome Arcano e Segno Zodiacale) */
+        .card-back-overlay {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at center, rgba(15, 5, 0, 0.95) 0%, rgba(5, 0, 0, 0.98) 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.4s ease;
+            padding: 1rem; text-align: center;
+            border: 2px solid rgba(212, 175, 55, 0.4);
+            box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.15);
+        }
+        .card-wrapper:hover .card-back-overlay { opacity: 1; }
+        .card-wrapper:hover .card-back-ornament { opacity: 0; transform: scale(0.9); }
+
+        /* FRONTE DELLA CARTA (Immagine) */
+        .card-front {
+            background-color: #050201;
+            transform: rotateY(180deg);
+            border: 6px solid #e8dcc4;
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg) scale(1.15) translateY(-10px) !important;
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.3), 15px 25px 40px rgba(0,0,0,1);
+            z-index: 50;
+        }
+
+        /* ================= MODALE: LA LETTURA ================= */
+        #reading-modal {
+            opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
+            backdrop-filter: blur(12px) brightness(0.2);
+        }
+        #reading-modal.active { opacity: 1; pointer-events: auto; z-index: 100; }
+
+        .modal-book {
+            transform: translateY(30px) scale(0.95);
+            opacity: 0; transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #reading-modal.active .modal-book {
+            transform: translateY(0) scale(1); opacity: 1;
+        }
+
+        /* ================= TRANSIZIONI SCENE ================= */
+        #app-container { display: grid; width: 100%; min-height: 100vh; }
+        .scene { grid-area: 1 / 1; transition: opacity 1s ease, visibility 1s ease; }
+        .scene.hidden-scene { opacity: 0; visibility: hidden; pointer-events: none; z-index: 10; }
+        .scene.active-scene { opacity: 1; visibility: visible; pointer-events: auto; z-index: 20; }
+        
+        /* SVG Props per il Tavolo */
+        .svg-prop {
+            position: absolute;
+            pointer-events: none;
+            z-index: 12;
+            filter: drop-shadow(10px 15px 15px rgba(0,0,0,0.9));
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- Sfondi Dinamici e Luce -->
+    <div id="bg-intro" class="bg-layer"></div>
+    <div id="bg-table" class="bg-layer"></div>
+    <div class="smoke-overlay"></div>
+    <div class="candlelight-flicker"></div>
+    <div class="celestial-sky"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div id="app-container">
+
+        <!-- ================= INTRO ================= -->
+        <main id="intro-scene" class="scene active-scene flex items-center justify-center p-4 py-10 md:p-10 w-full min-h-screen">
+            <div class="parchment-paper max-w-4xl w-full mx-auto p-8 md:p-16 transform rotate-[-1deg]">
+                
+                <!-- Dettagli Arcani Pergamena -->
+                <div class="parchment-lines"></div>
+
+                <div class="text-center relative z-10">
+                    
+                    <h2 class="font-cinzel text-[#8a6a1c] text-sm md:text-lg tracking-[0.4em] uppercase mb-4 opacity-90 drop-shadow-sm font-bold">I Sussurri</h2>
+                    
+                    <!-- Fasi Lunari e Geometria Sacra Intro -->
+                    <div class="flex justify-center items-center mb-6 opacity-80 w-full max-w-sm mx-auto">
+                        <div class="w-full h-px bg-gradient-to-r from-transparent to-[#4a2e15]"></div>
+                        
+                        <svg class="w-16 h-8 flex-shrink-0 mx-2 text-[#4a2e15]" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- Luna Crescente -->
+                            <path d="M25,20 A10,10 0 1,1 25,39 A15,15 0 1,0 25,20" fill="currentColor"/>
+                            <!-- Luna Piena Centrale -->
+                            <circle cx="50" cy="20" r="10" fill="currentColor"/>
+                            <circle cx="50" cy="20" r="14" stroke-dasharray="2 2"/>
+                            <!-- Luna Calante -->
+                            <path d="M75,20 A10,10 0 1,0 75,39 A15,15 0 1,1 75,20" fill="currentColor"/>
+                        </svg>
+
+                        <div class="w-full h-px bg-gradient-to-l from-transparent to-[#4a2e15]"></div>
+                    </div>
+
+                    <h1 class="font-cinzel text-5xl md:text-7xl font-bold text-[#1a100c] mb-8 drop-shadow-sm">
+                        L'Oroscopo settimanale<br>di Dino
+                    </h1>
+
+                    <div class="font-fell text-[#1a100c] text-xl md:text-2xl leading-relaxed text-left mb-10 max-w-xl mx-auto italic drop-shadow-sm">
+                        <!-- Capolettera aggiornato: corsivo, dorato, sottile, con effetto 3D -->
+                        <span class="text-5xl md:text-6xl font-fell italic font-normal dropcap-text align-baseline -ml-1 pr-1">A</span>ccomodati. Il legno di questo antico tavolo ha assorbito i destini di mille viandanti prima di te. 
+                        Oggi non cercheremo le risposte nelle stelle, ma nei simboli dei miei Arcani Maggiori. 
+                        Scegli la carta che ti chiama. Nessun velo, solo il sussurro immutabile della verità.
+                    </div>
+
+                    <button onclick="revealTable()" class="group relative inline-flex items-center justify-center px-12 py-5 font-cinzel font-bold text-lg tracking-widest text-[#fdf3d8] bg-[#1a0f0a] border border-[#d4af37] shadow-[0_0_20px_rgba(212,175,55,0.2)] transition-all hover:bg-[#050201] hover:shadow-[0_0_35px_rgba(212,175,55,0.4)] hover:scale-105">
+                        <span class="absolute inset-0 border border-[#b5974a] m-1 opacity-50 transition-all group-hover:m-0"></span>
+                        <span>Avvicinati al Tavolo</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================= IL TAVOLO: LE CARTE SPARSE ================= -->
+        <section id="table-scene" class="scene hidden-scene py-16 px-4 md:px-12 w-full flex flex-col items-center overflow-hidden relative">
+            
+            <!-- Cerchio runico/mandala di sfondo inciso nel tavolo -->
+            <div class="arcane-runes-bg"></div>
+
+            <!-- Oggetti Fisici -->
+            
+            <!-- Cristallo -->
+            <div class="svg-prop" style="top: 15%; left: 8%; transform: rotate(-15deg);">
+                <svg viewBox="0 0 100 100" class="w-16 h-24 md:w-24 md:h-32" style="filter: drop-shadow(0 0 20px rgba(138,43,226,0.5));">
+                    <polygon points="50,10 75,40 65,90 50,100 35,90 25,40" fill="rgba(60,20,80,0.85)" stroke="#a855f7" stroke-width="1.5"/>
+                    <polygon points="50,10 50,100 75,40" fill="rgba(168,85,247,0.2)"/>
+                    <polygon points="50,10 50,100 25,40" fill="rgba(0,0,0,0.4)"/>
+                    <polygon points="50,10 60,30 40,30" fill="rgba(255,255,255,0.2)"/>
+                </svg>
+            </div>
+
+            <!-- Secondo Cristallo Ametista -->
+            <div class="svg-prop" style="bottom: 20%; left: 12%; transform: rotate(45deg) scale(0.7);">
+                <svg viewBox="0 0 100 100" class="w-16 h-24 md:w-24 md:h-32" style="filter: drop-shadow(0 0 15px rgba(138,43,226,0.4));">
+                    <polygon points="50,10 75,40 65,90 50,100 35,90 25,40" fill="rgba(60,20,80,0.85)" stroke="#a855f7" stroke-width="1.5"/>
+                    <polygon points="50,10 50,100 75,40" fill="rgba(168,85,247,0.2)"/>
+                    <polygon points="50,10 50,100 25,40" fill="rgba(0,0,0,0.4)"/>
+                    <polygon points="50,10 60,30 40,30" fill="rgba(255,255,255,0.2)"/>
+                </svg>
+            </div>
+
+            <!-- Terzo Cristallo Ametista -->
+            <div class="svg-prop" style="top: 25%; right: 5%; transform: rotate(-100deg) scale(0.6);">
+                <svg viewBox="0 0 100 100" class="w-16 h-24 md:w-24 md:h-32" style="filter: drop-shadow(0 0 15px rgba(138,43,226,0.4));">
+                    <polygon points="50,10 75,40 65,90 50,100 35,90 25,40" fill="rgba(60,20,80,0.85)" stroke="#a855f7" stroke-width="1.5"/>
+                    <polygon points="50,10 50,100 75,40" fill="rgba(168,85,247,0.2)"/>
+                    <polygon points="50,10 50,100 25,40" fill="rgba(0,0,0,0.4)"/>
+                    <polygon points="50,10 60,30 40,30" fill="rgba(255,255,255,0.2)"/>
+                </svg>
+            </div>
+
+            <!-- Pentacolo / Moneta d'Oro -->
+            <div class="svg-prop" style="bottom: 15%; right: 10%; transform: rotate(25deg);">
+                <svg viewBox="0 0 100 100" class="w-20 h-20 md:w-28 md:h-28 text-gold-dark">
+                    <circle cx="50" cy="50" r="45" fill="#1a0d05" stroke="currentColor" stroke-width="4"/>
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2"/>
+                    <polygon points="50,15 61,82 17,38 83,38 39,82" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="5" fill="currentColor"/>
+                </svg>
+            </div>
+
+            <!-- Chiave -->
+            <div class="svg-prop" style="top: 60%; left: 5%; transform: rotate(-70deg) scale(0.9);">
+                <svg viewBox="0 0 100 100" class="w-24 h-24 md:w-32 md:h-32 text-gold-antique">
+                    <path d="M25,50 A15,15 0 1,1 25,49.9 Z" fill="none" stroke="currentColor" stroke-width="5"/>
+                    <circle cx="25" cy="50" r="5" fill="currentColor"/>
+                    <path d="M40,50 L85,50 L85,65 L75,65 L75,50 L65,50 L65,60 L55,60 L55,50" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <div class="text-center mb-16 relative z-20 bg-[#050201]/70 p-8 rounded border border-[#d4af37]/30 shadow-[0_0_40px_rgba(0,0,0,0.9),inset_0_0_20px_rgba(212,175,55,0.1)] backdrop-blur-md">
+                <svg class="w-12 h-12 mx-auto mb-4 text-[#d4af37] opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"></path>
+                    <circle cx="12" cy="12" r="4"></circle>
+                </svg>
+                <h2 class="font-cinzel text-4xl md:text-5xl text-[#fcecae] drop-shadow-[0_0_15px_rgba(212,175,55,0.4)] mb-3 font-bold">Il tuo destino in mano alle carte</h2>
+                <p class="font-fell text-xl md:text-2xl text-[#b5974a] italic">Lascia che l'istinto guidi la tua mano verso il tuo segno.</p>
+            </div>
+
+            <!-- Griglia delle Carte Sparpagliate -->
+            <div id="tarot-spread" class="relative max-w-6xl w-full flex flex-wrap justify-center items-center content-center z-20 pb-20">
+                <!-- Inject JS -->
+            </div>
+
+            <div class="mt-8 relative z-20">
+                <button onclick="returnToIntro()" class="font-cinzel text-[#8a6a1c] hover:text-[#d4af37] transition-colors text-sm tracking-[0.2em] uppercase border-b border-[#8a6a1c]/50 pb-1 hover:border-[#d4af37] hover:shadow-glow">
+                    Abbandona il tavolo
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ================= LA RIVELAZIONE: MODALE / LIBRO ================= -->
+    <div id="reading-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
+        
+        <div class="absolute inset-0 cursor-pointer bg-black/60" onclick="closeModal()"></div>
+        
+        <!-- Il Libro/Pergamena aperta, INGRANDITO per lettura ottimizzata -->
+        <div class="modal-book relative w-full md:w-11/12 max-w-7xl flex flex-col md:flex-row shadow-parchment max-h-[95vh] overflow-y-auto md:overflow-y-hidden">
+            
+            <!-- Bottone "X" Aggiornato: Sempre visibile e centrato negli angoli interni della pergamena -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-[60] w-10 h-10 md:w-12 md:h-12 bg-[#2b1810] text-gold-antique border-2 border-[#d4af37] rounded-full flex items-center justify-center shadow-[0_5px_15px_rgba(0,0,0,0.8),0_0_15px_rgba(212,175,55,0.3)] hover:bg-[#1a0f0a] hover:text-[#fcecae] hover:scale-110 transition-all">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Lato Sinistro: La Carta in grande -->
+            <!-- Proporzioni sistemate: 4/12 per dare più spazio al testo -->
+            <div class="w-full md:w-4/12 p-10 flex items-center justify-center relative bg-[#050201] border-b md:border-b-0 md:border-r border-[#2b1810]">
+                <!-- Aura dorata -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="w-64 h-64 bg-[#d4af37] rounded-full blur-[90px] opacity-15"></div>
+                </div>
+
+                <div class="tarot-aspect w-full max-w-[320px] relative rounded-lg shadow-[0_20px_50px_rgba(0,0,0,1),0_0_30px_rgba(212,175,55,0.2)] border-[8px] border-[#e8dcc4] bg-[#050201] z-10 overflow-hidden">
+                    <div id="modal-card-image" class="absolute inset-0 bg-cover bg-no-repeat bg-center" style="transform: scale(1.06);"></div>
+                    <div class="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] pointer-events-none"></div>
+                </div>
+            </div>
+
+            <!-- Lato Destro: La Lettura -->
+            <!-- Proporzioni sistemate: 8/12 e padding aumentato -->
+            <div class="w-full md:w-8/12 parchment-paper p-8 md:p-16 relative flex flex-col justify-center">
+                <div class="parchment-lines"></div> <!-- Linee arcane riutilizzate -->
+                <div class="relative z-10">
+                    <div class="flex items-center mb-6">
+                        <div class="h-px bg-[#4a0e17] flex-grow opacity-40"></div>
+                        <p id="modal-sign" class="font-medieval text-[#4a0e17] uppercase tracking-widest text-sm mx-4 font-bold"></p>
+                        <div class="h-px bg-[#4a0e17] flex-grow opacity-40"></div>
+                    </div>
+                    
+                    <h3 id="modal-tarot" class="font-cinzel text-4xl md:text-6xl font-black text-[#4a0e17] drop-shadow-sm text-center mb-10 border-b border-[#4a0e17]/20 pb-6"></h3>
+
+                    <!-- Testo reso visivamente più comodo e capolettera ottimizzato inline -->
+                    <div class="font-fell text-[#1a100c] text-xl md:text-3xl leading-relaxed text-left drop-shadow-sm">
+                        <p>
+                            <!-- Capolettera aggiornato: corsivo, dorato scuro, sottile, con effetto 3D -->
+                            <span id="dropcap" class="text-5xl md:text-6xl font-fell italic font-normal dropcap-text align-baseline -ml-1 pr-1"></span><span id="modal-text"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DATI E LOGICA ================= -->
+    <script>
+        const tarotData = [
+            {
+                id: 'ariete', sign: 'Ariete', num: 'IX', tarot: "L'Eremita",
+                imgUrl: 'https://i.pinimg.com/474x/dc/fb/ec/dcfbecc00785eedfd89baaedef2cc0ff.jpg',
+                text: "La luce della lanterna vi guida all'interno. Dimenticate le azioni impulsive. Questa settimana l'Eremita vi impone pazienza. Smettete di correre, la risposta al vostro dilemma richiede silenzio e una profonda introspezione"
+            },
+            {
+                id: 'toro', sign: 'Toro', num: 'X', tarot: "La Ruota della Fortuna",
+                imgUrl: 'https://i.pinimg.com/474x/ce/65/7a/ce657a3ee536b7ca670b6002d74c9658.jpg',
+                text: "Il perno gira implacabile. Sradicatevi dalle solide certezze, questa settimana sarete in balia del fato. Non opponete resistenza al caos, cercare di mantenere lo status quo vi spezzerà. La Ruota annuncia un cambiamento repentino. Abbracciate l'imprevisto con fluidità"
+            },
+            {
+                id: 'gemelli', sign: 'Gemelli', num: 'XIV', tarot: "La Temperanza",
+                imgUrl: 'https://i.pinimg.com/474x/85/f7/92/85f7920173f9717f72767339b022e6b4.jpg',
+                text: "L'acqua scorre tra due coppe d'oro senza versarsi. La Temperanza vi impone l'alchimia dell'anima. Se c'è un conflitto nella vostra vita, questa è la settimana in cui trovare il punto di sintesi. Misurate le parole, calmate le acque"
+            },
+            {
+                id: 'cancro', sign: 'Cancro', num: 'XVI', tarot: "La Torre",
+                imgUrl: 'https://www.bellunopress.it/wp-content/uploads/2016/07/mel-immagino-la-torre.png',
+                text: "Un fulmine divino squarcia il cielo buio. Qualcosa su cui avevate costruito le vostre sicurezze si rivelerà fragile. La Torre crolla, ma non temete, cadranno solo le strutture che vi tenevano prigionieri. Le macerie fertilizzeranno il terreno per la rinascita"
+            },
+            {
+                id: 'leone', sign: 'Leone', num: 'XII', tarot: "L'Appeso",
+                imgUrl: 'https://i.pinimg.com/474x/cb/2c/ac/cb2cac44d8869e4ca8d11487a52193bf.jpg',
+                text: "Tutto è sospeso. Non cercate di forzare la mano o di mettervi al centro del palcoscenico, i vostri sforzi mondani saranno vani. L'Appeso vi richiede un sacrificio volontario, una pausa totale dal controllo. Guardate il mondo al contrario"
+            },
+            {
+                id: 'vergine', sign: 'Vergine', num: '0', tarot: "Il Matto",
+                imgUrl: 'https://i.pinimg.com/474x/1b/2e/8b/1b2e8ba4e62b2a508f16757ab403f4aa.jpg',
+                text: "Sull'orlo del precipizio, col viso rivolto al sole. Buttate via l'agenda. Dimenticate il controllo e i piani minuziosi. Il Matto vi inietta un'energia irrazionale, pura e primordiale. Questa settimana è propizia per fare quel salto nel buio che rimandavate"
+            },
+            {
+                id: 'bilancia', sign: 'Bilancia', num: 'XI', tarot: "La Forza",
+                imgUrl: 'https://i.pinimg.com/236x/82/fc/18/82fc1892f1f3916173ed6f049f1fd835.jpg',
+                text: "Le mani delicate di una donna accarezzano le fauci della fiera. La vera forza non urla e non usa spade. Questa settimana dovrete domare le vostre bestie interiori non con la repressione, ma con la compassione. La gentilezza dominerà ogni conflitto"
+            },
+            {
+                id: 'scorpione', sign: 'Scorpione', num: 'XIX', tarot: "Il Sole",
+                imgUrl: 'https://i.pinimg.com/236x/17/17/49/1717498884aa7515a33b148126f6cdcc.jpg',
+                text: "Uscite dalle fredde tenebre. Le ombre fuggono via e non c'è più spazio per i segreti, le trame o il tormento. Il Sole porta un'illuminazione gloriosa e calda. Avrete successo palese e una chiarezza assoluta"
+            },
+            {
+                id: 'sagittario', sign: 'Sagittario', num: 'II', tarot: "La Papessa",
+                imgUrl: 'https://lh5.googleusercontent.com/proxy/pJyiOPDf_zG2JZZneX5MQHi8rXXMUnYYivDo-aRdc6JIsS9-Kv_K3FvxcMBhfZw6B85x_qlHKqdNyU0GxdKYkAEZdzSl4xkaOE_giKU-Hw5K4Zx61X3Un3rhuSuJ9T7HgA',
+                text: "Il velo copre il tempio della conoscenza. Non agite impulsivamente. Non parlate. Osservate. La Papessa siede silenziosa custodendovi i segreti dell'inconscio. Il vostro sesto senso sarà acuto, fidatevi ciecamente delle intuizioni. La verità emergerà da sola"
+            },
+            {
+                id: 'capricorno', sign: 'Capricorno', num: 'I', tarot: "Il Mago",
+                imgUrl: 'https://i.pinimg.com/474x/b9/ca/6c/b9ca6cfc4027e7e79ce90189ff30eb83.jpg',
+                text: "Come in alto, così in basso. Sul tavolo davanti a voi, l'universo ha disposto tutti gli strumenti. Non vi manca nulla per plasmare la realtà. Il Mago indica una settimana manifestazione. Siete capi del vostro destino"
+            },
+            {
+                id: 'acquario', sign: 'Acquario', num: 'IV', tarot: "L'Imperatore",
+                imgUrl: 'https://i.pinimg.com/474x/23/ae/55/23ae55a21be4b0baa799ef0fc27837b7.jpg',
+                text: "Struttura, ordine, comando. Lasciate da parte la vostra proverbiale anarchia. Questa settimana è governata dall'Imperatore, richiede disciplina, logica e regole ferree. Costruite fondamenta di pietra, non sono ammesse debolezze"
+            },
+            {
+                id: 'pesci', sign: 'Pesci', num: 'VII', tarot: "Il Carro",
+                imgUrl: 'https://smorfianapoletanaweb.it/wp-content/uploads/2016/09/il_carro.png.webp',
+                text: "Le due sfingi tirano in direzioni opposte, ma voi avete le redini salde. Vittoria attraverso il trionfo della volontà. Questa settimana supererete di slancio gli ostacoli se saprete padroneggiare le vostre emozioni. Caricate a testa alta"
+            }
+        ];
+
+        // --- Generazione Carte Sparse ---
+        const spreadContainer = document.getElementById('tarot-spread');
+
+        tarotData.forEach(data => {
+            // Genera rotazioni e traslazioni casuali per simulare carte "buttate" sul tavolo
+            const randRot = (Math.random() * 30 - 15).toFixed(1); // Da -15 a +15 gradi
+            const randY = (Math.random() * 20 - 10).toFixed(1);   // Offset Y
+            
+            const cardHTML = `
+                <div class="card-scatter-wrapper" style="transform: rotate(${randRot}deg) translateY(${randY}px);">
+                    <div class="card-wrapper group" onclick="flipAndRead(this, '${data.id}')">
+                        <div class="card-inner tarot-aspect">
+                            
+                            <!-- RETRO DELLA CARTA E HOVER (Segno + Nome) -->
+                            <div class="card-face card-back">
+                                <div class="card-back-ornament">
+                                    <span class="font-cinzel text-[#fcecae] text-4xl font-bold opacity-90 drop-shadow-[0_0_10px_rgba(0,0,0,1)] z-10">${data.num}</span>
+                                </div>
+                                <!-- Overlay magico che compare sull'hover -->
+                                <div class="card-back-overlay">
+                                    <span class="font-medieval text-gold-antique text-sm uppercase tracking-widest mb-1 drop-shadow-md">${data.sign}</span>
+                                    <span class="font-cinzel text-gold-light text-lg md:text-xl font-bold leading-tight drop-shadow-[0_0_10px_rgba(212,175,55,0.8)] px-2 break-words">${data.tarot}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- FRONTE DELLA CARTA (Immagine Zoomata per tagliare i bordi) -->
+                            <div class="card-face card-front relative overflow-hidden">
+                                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('${data.imgUrl}'); transform: scale(1.06);"></div>
+                                <div class="absolute inset-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.9)] pointer-events-none"></div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            `;
+            spreadContainer.innerHTML += cardHTML;
+        });
+
+        // --- Transizioni di Scena Fluide ---
+        const introScene = document.getElementById('intro-scene');
+        const tableScene = document.getElementById('table-scene');
+        const bgIntro = document.getElementById('bg-intro');
+        const bgTable = document.getElementById('bg-table');
+
+        function revealTable() {
+            // Cambia Sfondi Base
+            bgIntro.style.opacity = '0';
+            bgTable.style.opacity = '1';
+
+            // Sfuma la scena corrente
+            introScene.classList.replace('active-scene', 'hidden-scene');
+            
+            // Aspetta un momento e fa apparire il tavolo
+            setTimeout(() => {
+                tableScene.classList.replace('hidden-scene', 'active-scene');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 800);
+        }
+
+        function returnToIntro() {
+            // Ripristina Sfondi
+            bgTable.style.opacity = '0';
+            bgIntro.style.opacity = '1';
+
+            tableScene.classList.replace('active-scene', 'hidden-scene');
+            
+            setTimeout(() => {
+                introScene.classList.replace('hidden-scene', 'active-scene');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 800);
+        }
+
+        // --- Logica Carta: Flip e Modale ---
+        const modal = document.getElementById('reading-modal');
+        let activeCardInner = null;
+        
+        function flipAndRead(wrapperElement, id) {
+            const data = tarotData.find(item => item.id === id);
+            if(!data) return;
+
+            const cardInner = wrapperElement.querySelector('.card-inner');
+            
+            if(activeCardInner && activeCardInner !== cardInner) {
+                activeCardInner.classList.remove('flipped');
+            }
+            
+            // Gira fisicamente la carta sul tavolo
+            cardInner.classList.add('flipped');
+            activeCardInner = cardInner;
+
+            // Attendi animazione flip (0.6s) prima di aprire la lettura
+            setTimeout(() => {
+                document.getElementById('modal-card-image').style.backgroundImage = `url('${data.imgUrl}')`;
+                document.getElementById('modal-sign').textContent = `Il Destino del ${data.sign}`;
+                document.getElementById('modal-tarot').textContent = `${data.num} - ${data.tarot}`;
+                
+                const firstLetter = data.text.charAt(0);
+                const restOfText = data.text.slice(1);
+                document.getElementById('dropcap').textContent = firstLetter;
+                document.getElementById('modal-text').innerHTML = restOfText;
+
+                // Mostra il libro con la lettura
+                document.body.style.overflow = 'hidden'; // Blocca scroll dietro al modale
+                modal.classList.add('active');
+            }, 700);
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            
+            if(activeCardInner) {
+                activeCardInner.classList.remove('flipped');
+                activeCardInner = null;
+            }
+            setTimeout(() => {
+                document.body.style.overflow = 'scroll'; // Sblocca ripristinando la barra
+            }, 500);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
