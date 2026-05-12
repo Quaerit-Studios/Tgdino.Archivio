@@ -1,0 +1,23 @@
+- id: 1
+  title: "Sega - Cancellato il \"Super Game\", focus sui giochi tradizionali"
+  description: |
+    Sega ha ufficialmente cancellato il misterioso progetto "Super Game", originariamente previsto per il 2026. La compagnia ha deciso di ridurre gli investimenti sui titoli live service e free-to-play. La scelta strategica è arrivata a causa dei risultati deludenti di Sonic Rumble Party e dell'acquisizione di Rovio. Circa 100 dipendenti verranno spostati per rafforzare lo sviluppo di esperienze di gioco più tradizionali. Proseguono invece i lavori sui revival degli storici franchise del marchio, 
+    tra cui Crazy Taxi e Jet Set Radio.
+  links:
+  - "https://multiplayer.it/notizie/sega-ha-cancellato-il-suo-super-game-e-diminuira-gli-investimenti-sui-giochi-live-service.html"
+
+- id: 2
+  title: "Google - Bloccato il primo attacco zero-day sviluppato con l'aiuto dell'IA"
+  description: |
+    Google ha sventato per la prima volta un pericoloso exploit zero-day creato dai criminali informatici con il supporto dell'intelligenza artificiale. L'attacco mirava a una piattaforma open source di amministrazione per aggirare i meccanismi di autenticazione a due fattori. I ricercatori hanno individuato nel codice Python tracce tipiche dell'IA. La minaccia sfruttava un errore logico nella progettazione del 
+    sistema che permetteva di eludere i controlli di sicurezza della verifica a due passaggi. 
+  links:
+  - "https://multiplayer.it/notizie/google-blocca-per-la-prima-volta-un-attacco-zero-day-sviluppato-con-laiuto-dellia-destinato-a-colpire-sistemi-con-autenticazione-a-due-fattori.html"
+
+- id: 3
+  title: "Amazon - Al via negli Stati Uniti le consegne ultrarapide entro 30 minuti"
+  description: |
+    Amazon ha lanciato ufficialmente "Amazon Now", un nuovo servizio che garantisce la consegna degli ordini entro soli 30 minuti. L'opzione è attualmente attiva 24 ore su 24 in alcune città degli Stati Uniti, tra cui Atlanta, Dallas-Fort Worth, Philadelphia e Seattle. Il catalogo include migliaia di articoli selezionati, spaziando dai prodotti alimentari freschi all'elettronica, fino agli articoli per la cura personale. L'azienda prevede di espandere l'iniziativa in altre metropoli americane entro fine anno, 
+    ma al momento non ci sono piani per l'arrivo in Italia. 
+  links:
+  - "https://multiplayer.it/notizie/amazon-rende-disponibili-consegne-entro-30-minuti-ora-solo-stati-uniti-america.html"
