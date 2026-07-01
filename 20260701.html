@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oroscopo della Zona di Quarantena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;600;800;900&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                'surv-black': '#0a0a0a',
+                'surv-rust': '#4a0404',
+                'surv-mil-green': '#2a4214', /* Verde militare scuro ad alto contrasto */
+                'surv-paper-dark': '#8c7a5f'
+            },
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                stencil: ['"Black Ops One"', 'cursive'],
+                typewriter: ['"Special Elite"', 'monospace']
+            }
+        }
+    }
+}
+</script>
+<style>
+    body { background-color: #0a0a0a; color: #e5e7eb; overflow: hidden; }
+    
+    /* Sfondi delle due schermate */
+    .bg-screen-1 { background-image: url('https://i.pinimg.com/originals/a8/78/6e/a8786e35cc486569684cc8c1ce6a6e08.jpg'); background-size: cover; background-position: center; }
+    .bg-screen-2 { background-image: url('https://falcon-lair.com/uploads/gallery/album_24/gallery_1872_24_441170.jpg'); background-size: cover; background-position: center; }
+    
+    /* Overlay scuro per leggerezza del testo sugli sfondi */
+    .overlay { position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%); pointer-events: none; z-index: 1; }
+    
+    /* Animazione allarme rosso per i titoli */
+    .alarm-glow { animation: alarmPulse 1.5s infinite alternate; }
+    @keyframes alarmPulse { 
+        0% { text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.6); color: #fff; } 
+        100% { text-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 50px rgba(255, 0, 0, 0.8), 0 0 70px rgba(255, 0, 0, 0.5); color: #ffcccc; } 
+    }
+    
+    /* Transizioni cinematografiche */
+    .screen-1-transition { transition: transform 1.8s cubic-bezier(0.5, 0, 0.1, 1), opacity 1.5s ease-in; }
+    .screen-2-transition { transition: transform 1.5s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 1.5s ease-out; }
+    
+    /* Nascondere scrollbar */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* =====================================================================
+       STILE FASCICOLI (CARTA ROVINATA E MARCIA)
+       ===================================================================== */
+    .card-wrapper {
+        filter: drop-shadow(8px 12px 15px rgba(0,0,0,0.85));
+        width: 100%;
+        display: flex;
+    }
+    
+    .paper-card { 
+        background-color: #c8b9a6; 
+        background-image: 
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.45'/%3E%3C/svg%3E"),
+            radial-gradient(circle at center, transparent 40%, rgba(45, 35, 20, 0.85) 120%); /* Bordi anneriti/bruciati */
+        border: 1px solid #4a3b2c; 
+        border-radius: 4px; 
+        /* Ombre interne per lo sporco ai bordi. L'ombra esterna è passata al .card-wrapper */
+        box-shadow: inset 0 0 60px rgba(50, 35, 20, 0.95), inset 0 0 15px rgba(0,0,0,0.8); 
+        position: relative; 
+        overflow: hidden; 
+        height: auto; 
+    }
+    
+    /* FORME TAGLIATE (Clip Paths) per simulare l'angolo mancante */
+    .shape-1 { clip-path: polygon(0 0, calc(100% - 55px) 0, 100% 55px, 100% 100%, 0 100%); }
+    .shape-2 { clip-path: polygon(65px 0, 100% 0, 100% 100%, 0 100%, 0 65px); }
+    .shape-3 { clip-path: polygon(0 0, 100% 0, 100% 100%, 55px 100%, 0 calc(100% - 55px)); }
+    .shape-4 { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 45px), calc(100% - 45px) 100%, 0 100%); }
+    .shape-5 { clip-path: polygon(0 0, calc(100% - 75px) 0, 100% 75px, 100% 100%, 0 100%); }
+    .shape-6 { clip-path: polygon(0 0, calc(100% - 55px) 0, 100% 55px, 100% 100%, 45px 100%, 0 calc(100% - 45px)); }
+
+    /* ALETTE PIEGATE (Flaps) */
+    .flap { position: absolute; z-index: 1; pointer-events: none; }
+    .flap-tr { top: 0; right: 0; width: 55px; height: 55px; background: linear-gradient(225deg, transparent 50%, #9a8a71 50%, #615546 100%); box-shadow: -4px 4px 8px rgba(0,0,0,0.5); }
+    .flap-tl { top: 0; left: 0; width: 65px; height: 65px; background: linear-gradient(135deg, transparent 50%, #9a8a71 50%, #615546 100%); box-shadow: 4px 4px 8px rgba(0,0,0,0.5); }
+    .flap-bl { bottom: 0; left: 0; width: 55px; height: 55px; background: linear-gradient(45deg, transparent 50%, #9a8a71 50%, #615546 100%); box-shadow: 4px -4px 8px rgba(0,0,0,0.5); }
+    .flap-br { bottom: 0; right: 0; width: 45px; height: 45px; background: linear-gradient(315deg, transparent 50%, #9a8a71 50%, #615546 100%); box-shadow: -3px -3px 6px rgba(0,0,0,0.5); }
+    .flap-tr-lg { top: 0; right: 0; width: 75px; height: 75px; background: linear-gradient(225deg, transparent 50%, #9a8a71 50%, #504535 100%); box-shadow: -5px 5px 12px rgba(0,0,0,0.6); }
+    .flap-bl-sm { bottom: 0; left: 0; width: 45px; height: 45px; background: linear-gradient(45deg, transparent 50%, #9a8a71 50%, #615546 100%); box-shadow: 3px -3px 6px rgba(0,0,0,0.5); }
+    
+    /* Contenitore inferiore: Solo per macchie e danni. Non toccherà mai i testi. */
+    .paper-decorations { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+    
+    /* EFFETTI MARCIUME, MUFFA E RUGGINE/SANGUE */
+    .rot-mold { position: absolute; background: radial-gradient(circle, rgba(35,40,25,0.7) 0%, rgba(20,25,15,0.4) 50%, transparent 80%); mix-blend-mode: multiply; filter: blur(5px); }
+    .rot-rust { position: absolute; background: radial-gradient(circle, rgba(60,30,10,0.6) 0%, rgba(40,15,5,0.4) 40%, transparent 70%); mix-blend-mode: color-burn; filter: blur(3px); }
+    .blood-stain { position: absolute; background: radial-gradient(circle, rgba(74,4,4,0.85) 10%, rgba(46,2,2,0.6) 50%, transparent 80%); mix-blend-mode: multiply; filter: blur(1.5px); }
+    
+    /* LIVELLO TESTI (Z-index 10): Sta sempre in primo piano, protetto dal padding */
+    .content-layer { position: relative; z-index: 10; color: #111; }
+    
+    /* Titoli macchina da scrivere */
+    .title-distressed { font-family: 'Special Elite', monospace; color: #1a1512; border-bottom: 2px dashed rgba(140, 122, 95, 0.6); }
+</style>
+</head>
+<body class="antialiased selection:bg-surv-rust selection:text-white">
+
+<!-- Schermata 2 (Oroscopo) -->
+<div id="screen-2" class="fixed inset-0 z-10 bg-screen-2 flex flex-col justify-between screen-2-transition" style="opacity: 0; transform: scale(0.95); display: none;">
+    <div class="overlay"></div>
+    
+    <div class="relative z-30 pt-6 pb-2 text-center shrink-0">
+        <h2 class="font-stencil text-2xl md:text-4xl text-white alarm-glow uppercase tracking-widest drop-shadow-[0_5px_5px_rgba(0,0,0,1)]">Oroscopo della Zona di Quarantena</h2>
+    </div>
+    
+    <!-- Carosello Orizzontale dei 12 Fascicoli -->
+    <div class="relative z-30 flex-1 flex items-center justify-center w-full max-w-[100vw] mx-auto overflow-hidden">
+        
+        <!-- Freccia Precedente -->
+        <button id="btn-prev" class="absolute left-2 md:left-6 z-40 bg-black/80 hover:bg-black/100 border-2 border-surv-rust text-white p-3 md:p-4 rounded-full transition-all hover:scale-110 shadow-[0_0_20px_rgba(0,0,0,0.9)] focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        
+        <div id="carousel" class="flex w-full h-full overflow-x-auto hide-scrollbar scroll-smooth gap-8 px-16 md:px-32 py-10 snap-x snap-mandatory items-center">
+            
+            <!-- 1. ARIETE -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-1">
+                        <div class="flap flap-tr"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-mold" style="bottom: -20px; right: -20px; width: 150px; height: 150px;"></div>
+                            <div class="blood-stain" style="top: -30px; left: -30px; width: 160px; height: 140px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Ariete</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Operatore Tattico"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Pianificazione a lungo termine, pazienza, capacità di allestire perimetri difensivi.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Scorpione, Capricorno.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Tensioni interne e un forte senso di isolamento. Questa settimana cerca di non farti prendere dall'ansia del controllo. Nelle dinamiche di gruppo, o durante l'assegnazione dei compiti, impara a delegare. Le stelle suggeriscono prudenza nelle decisioni impulsive: non tutto ciò che si muove nel buio è una minaccia, a volte è solo un'occasione mancata per stringere nuove alleanze.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">8 anni, decesso per il cedimento del proprio rifugio sotterraneo.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 2. TORO -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-3">
+                        <div class="flap flap-bl"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-rust" style="top: -10px; left: 40%; width: 180px; height: 100px;"></div>
+                            <div class="blood-stain" style="bottom: 10%; right: -40px; width: 120px; height: 180px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Toro</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Ricognitore"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Resistenza fisica, orientamento senza alcuna strumentazione, quando si muove non lascia tracce.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Gemelli, Sagittario.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Sono favoriti gli incontri inaspettati, anche in un mondo in rovina. Tra pochi giorni potresti trovare un accordo vantaggioso per il baratto di risorse essenziali. Sul piano personale, le stelle ti consigliano di fermarti: la continua fuga logora. Prenditi un momento, la mente ha bisogno di stabilità tanto quanto il corpo ha bisogno di sostegno.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">4 anni, decesso per avvelenamento dovuto all'ingestione di scorte contaminate.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 3. GEMELLI -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-5">
+                        <div class="flap flap-tr-lg"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-mold" style="top: 40%; left: -30px; width: 130px; height: 200px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Gemelli</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Specialista Balistico"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Mira, gestione degli spazi e posizionamento strategico.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Vergine, Acquario.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> È una settimana complessa, in cui i vecchi fantasmi del passato tornano a farsi sentire nel silenzio del tuo avamposto. Mantieni la mente lucida e non farti distrarre da segnali ambigui. Un cambio di prospettiva, non solo attraverso il mirino della tua arma, ti aiuterà a inquadrare meglio i tuoi veri obiettivi personali.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">6 anni, decesso per ipotermia durante una bufera anomala in alta quota.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 4. CANCRO -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-2">
+                        <div class="flap flap-tl"></div>
+                        <div class="paper-decorations">
+                            <div class="blood-stain" style="bottom: -20px; left: -20px; width: 200px; height: 180px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Cancro</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Assaltatore d'Avanguardia"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Combattimento ravvicinato, forza e zero esitazione.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Ariete, Leone.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Si accende la tua determinazione, ma attenzione a non esaurire le tue energie in battaglie che non ti competono direttamente. Le relazioni con i compagni di accampamento richiedono molta più diplomazia e meno prove di forza. Trattenere l'aggressività sarà difficile, ma dovrai conservare la tua grinta per le reali sfide professionali.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">2 anni, decesso per infezione contratta durante un combattimento corpo a corpo.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 5. LEONE -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-4">
+                        <div class="flap flap-br"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-rust" style="top: -20px; right: 10%; width: 150px; height: 120px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Leone</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Incursore"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Mobilità, mimetizzazione, specialista nel superamento di barriere.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Bilancia, Pesci.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Ti senti spinto a esplorare costantemente nuovi territori e limiti, ma gli astri suggeriscono di consolidare ciò che hai già faticosamente conquistato. Nelle alleanze più strette, qualcuno richiede la tua presenza fissa e il tuo supporto emotivo, non solo i tuoi ritorni carichi di risorse. Cerca di essere più presente e meno sfuggente.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">7 anni, decesso per una caduta durante un'esplorazione in un edificio diroccato.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 6. VERGINE -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-6">
+                        <div class="flap flap-tr"></div>
+                        <div class="flap flap-bl-sm"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-mold" style="bottom: -40px; right: 30%; width: 220px; height: 140px;"></div>
+                            <div class="blood-stain" style="top: 30%; left: -40px; width: 110px; height: 160px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Vergine</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Coordinatore Logistico"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Gestione del razionamento, capacità di reclutamento, mantenimento dell'ordine.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Toro, Capricorno.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Si espandono le tue responsabilità. Questa settimana ti troverai a dover gestire scorte e persone con un'autorità che non ammette errori. Tuttavia, il tuo eccesso di rigidità sta creando malumori nell'avamposto. Impara a leggere tra le righe: a volte una piccola concessione nutre molto di più di un calcolo perfetto.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">5 anni, decesso a causa di un tradimento interno per il controllo delle risorse idriche.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 7. BILANCIA -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-1">
+                        <div class="flap flap-tr"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-rust" style="bottom: 15%; right: -20px; width: 140px; height: 140px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Bilancia</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Tecnico Corazzati"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Manutenzione di motori pesanti, saldatura e forgiatura di equipaggiamento anti-sommossa.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Gemelli, Scorpione.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> La ricerca di equilibrio è il tuo mantra, ma un grave imprevisto strutturale ti costringerà a rivedere del tutto i tuoi piani. Usa la tua creatività per creare nuove soluzioni anziché frustrarti. In ambito relazionale, sforzati di smussare gli angoli del tuo carattere.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">10 anni, decesso per inalazione prolungata di gas tossici.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 8. SCORPIONE -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-5">
+                        <div class="flap flap-tr-lg"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-mold" style="top: 20%; left: 40%; width: 150px; height: 150px;"></div>
+                            <div class="blood-stain" style="top: -10px; left: 10%; width: 90px; height: 110px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Scorpione</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Medico da Campo"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Interventi d'emergenza in condizioni non sterili, sintesi di farmaci naturali.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Cancro, Vergine.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Tornano a galla questioni del passato che credevi sepolte. In questi giorni sarai chiamato a curare non solo le ferite del tuo gruppo, ma anche quelle emotive. Presta attenzione alla tua stabilità: non puoi salvare chi ti sta intorno se non trovi prima il modo di guarire te stesso.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">12 anni, decesso per collasso da affaticamento e privazione del sonno.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 9. SAGITTARIO -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-3">
+                        <div class="flap flap-bl"></div>
+                        <div class="paper-decorations">
+                            <div class="blood-stain" style="bottom: -30px; left: 30%; width: 140px; height: 90px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Sagittario</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Supervisore"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Controllo e manutenzione, gestione dei sistemi di allarme.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Toro, Leone.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Imponi disciplina e stabilità, concetti a te estranei ma vitali in questa fase. La voglia di viaggiare sarà asfissiante, ma le stelle indicano che il tuo vero lavoro ora è dentro l'accampamento. Dedica del tempo ad aggiustare dei tuoi legami interpersonali: la fiducia è l'unica vera barriera contro il caos all'esterno.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">3 anni, decesso per una breccia nel perimetro durante un turno di guardia notturno.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 10. CAPRICORNO -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-6">
+                        <div class="flap flap-tr"></div>
+                        <div class="flap flap-bl-sm"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-mold" style="bottom: -20px; right: -20px; width: 200px; height: 200px;"></div>
+                            <div class="rot-rust" style="top: -20px; left: -20px; width: 170px; height: 150px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Capricorno</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Unità di Diversione"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Guida di sfondamento, manipolazione di esplosivi artigianali.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Ariete, Sagittario.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Sei energia esplosiva, perfetta per spazzare via ostacoli apparentemente insormontabili. Fai attenzione, però, a non fare terra bruciata intorno a te pur di raggiungere gli scopi prefissati. Dedicati all'equilibrio del lavoro di squadra, il tuo protagonismo spericolato rischia di isolarti. Ricorda che anche l'azione più spettacolare è inutile senza un piano.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">6 mesi, decesso per la detonazione di un ordigno improvvisato.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 11. ACQUARIO -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-2">
+                        <div class="flap flap-tl"></div>
+                        <div class="paper-decorations">
+                            <div class="blood-stain" style="bottom: 40%; left: -30px; width: 120px; height: 120px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Acquario</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Tracciatore"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Sopravvivenza in ambienti ostili, decifrazione di tracce biologiche.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Gemelli, Bilancia.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Il tuo intuito ti rende attento ai segnali più impercettibili dell'ambiente che ti circonda. È il momento di isolarsi dal trambusto dell'avamposto e riflettere sui propri passi. Evita le discussioni futili con il comando centrale, segui la tua pista. Una scoperta inaspettata cambierà le tue priorità.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">9 anni, decesso per un virus sconosciuto contratto dalla fauna selvatica locale.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- 12. PESCI -->
+            <div class="w-[85vw] max-w-[550px] shrink-0 snap-center flex">
+                <div class="card-wrapper">
+                    <article class="paper-card w-full p-10 md:p-12 flex flex-col shape-4">
+                        <div class="flap flap-br"></div>
+                        <div class="paper-decorations">
+                            <div class="rot-rust" style="top: -15px; right: 30%; width: 150px; height: 100px;"></div>
+                        </div>
+                        <div class="content-layer flex flex-col h-full">
+                            <h3 class="title-distressed text-3xl md:text-4xl mb-2 pb-3 uppercase">Pesci</h3>
+                            <p class="font-black tracking-widest text-base md:text-lg mb-6 uppercase text-surv-mil-green">"Comandante dell'Avamposto"</p>
+                            <div class="space-y-4 flex-grow text-sm md:text-[1.05rem] leading-relaxed font-semibold">
+                                <p><strong class="font-black text-black">Risorse:</strong> Disciplina militare e pragmatismo, esecuzione rapida di manovre gerarchiche.</p>
+                                <p><strong class="font-black text-black">Alleati Ideali (Affinità Zodiacale):</strong> Scorpione, Leone.</p>
+                                <p><strong class="font-black text-black">L'Oroscopo:</strong> Sogni un futuro migliore, ma la dura e cruda realtà richiede calma e disciplina. Sarai messo alla prova su decisioni etiche difficili che riguardano la pace collettiva. Sforzati di non lasciare che il cinismo ti indurisca del tutto. L'obiettivo della settimana è trovare un compromesso tra la razionalità e la compassione che ci rende ancora umani.</p>
+                            </div>
+                            <div class="mt-8 pt-5 border-t-2 border-solid border-surv-paper-dark shrink-0">
+                                <p class="font-bold text-sm md:text-base text-surv-rust">Esito di Sopravvivenza: <span class="text-black font-semibold">5 anni, decesso a causa di un ammutinamento per l'eccessiva rigidità del suo comando.</span></p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Freccia Successivo -->
+        <button id="btn-next" class="absolute right-2 md:right-6 z-40 bg-black/80 hover:bg-black/100 border-2 border-surv-rust text-white p-3 md:p-4 rounded-full transition-all hover:scale-110 shadow-[0_0_20px_rgba(0,0,0,0.9)] focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" /></svg>
+        </button>
+    </div>
+    
+    <div class="relative z-30 pb-4 text-center shrink-0">
+        <p class="text-xs md:text-sm text-gray-300 opacity-80 tracking-widest leading-tight">
+            Written by zhava<br>Idea by Alexiv
+        </p>
+    </div>
+</div>
+
+<!-- Schermata 1 (Intro) -->
+<div id="screen-1" class="fixed inset-0 z-50 bg-screen-1 flex flex-col items-center justify-between p-6 screen-1-transition">
+    <div class="overlay"></div>
+    <div class="relative z-20 flex-1 flex flex-col items-center justify-center text-center max-w-5xl w-full">
+        <h1 class="font-stencil text-5xl md:text-8xl text-white mb-16 alarm-glow uppercase leading-tight drop-shadow-[0_10px_10px_rgba(0,0,0,1)]">
+            Oroscopo della Zona<br>di Quarantena
+        </h1>
+        <button id="btn-enter" class="font-stencil bg-black/80 border-4 border-surv-rust text-white text-xl md:text-3xl py-4 md:py-6 px-10 md:px-16 tracking-widest uppercase transition-all duration-300 hover:bg-surv-rust hover:scale-105 shadow-[0_0_40px_rgba(255,0,0,0.5)] focus:outline-none">
+            Entra nell'accampamento
+        </button>
+    </div>
+    <div class="relative z-20 pb-4 text-center shrink-0">
+        <p class="text-xs md:text-sm text-gray-300 opacity-80 tracking-widest leading-tight">
+            Written by zhava<br>Idea by Alexiv
+        </p>
+    </div>
+</div>
+
+<script>
+    const screen1 = document.getElementById('screen-1');
+    const screen2 = document.getElementById('screen-2');
+    const btnEnter = document.getElementById('btn-enter');
+    const carousel = document.getElementById('carousel');
+    
+    // Gestione transizione cinematografica ingresso
+    btnEnter.addEventListener('click', () => {
+        screen1.style.transform = 'scale(2.5)';
+        screen1.style.opacity = '0';
+        screen1.style.pointerEvents = 'none';
+        
+        screen2.style.display = 'flex';
+        
+        setTimeout(() => {
+            screen2.style.opacity = '1';
+            screen2.style.transform = 'scale(1)';
+        }, 100);
+        
+        setTimeout(() => {
+            screen1.style.display = 'none';
+        }, 1800);
+    });
+
+    function getScrollStep() {
+        const card = carousel.querySelector('.w-\\[85vw\\]');
+        if(!card) return 400; 
+        return card.offsetWidth + 32; 
+    }
+
+    // Gestione Frecce del Carosello
+    document.getElementById('btn-prev').addEventListener('click', () => {
+        carousel.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
+    });
+    
+    document.getElementById('btn-next').addEventListener('click', () => {
+        carousel.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
+    });
+</script>
+</body>
+</html>
